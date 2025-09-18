@@ -1,0 +1,53 @@
+{
+  "eslint_config": {
+    "plugins": ["react-native"],
+    "rules": {
+      "react-native/no-raw-text": [
+        "error",
+        {
+          "skip": [],
+          "allowedStrings": [" ", "\n", "•", "✓", "⚠️", "💡", "📏", "⚡", "🌡️", "🔧", "📋", "🚨", "📍", "⏰"],
+          "textComponents": [
+            "Text",
+            "RNText", 
+            "Animated.Text"
+          ]
+        }
+      ],
+      "react-native/no-inline-styles": "warn",
+      "react-native/no-unused-styles": "error",
+      "react/jsx-no-literals": [
+        "error",
+        {
+          "noStrings": true,
+          "allowedStrings": ["•", "✓", "⚠️", "💡", "📏", "⚡", "🌡️", "🔧", "📋", "🚨", "📍", "⏰"],
+          "ignoreProps": true
+        }
+      ],
+      "react-native/no-color-literals": "warn",
+      "react-native/split-platform-components": "warn"
+    }
+  },
+  "commands": [
+    "npm install --save-dev eslint-plugin-react-native",
+    "npx eslint \"app/**/*.{js,jsx,ts,tsx}\" \"components/**/*.{js,jsx,ts,tsx}\" \"hooks/**/*.{js,jsx,ts,tsx}\" --max-warnings=0"
+  ],
+  "additional_rules": {
+    "react/jsx-no-literals": [
+      "error",
+      {
+        "noStrings": true,
+        "allowedStrings": ["•", "✓", "⚠️", "💡", "📏", "⚡", "🌡️", "🔧", "📋", "🚨", "📍", "⏰"],
+        "ignoreProps": true
+      }
+    ]
+  },
+  "settings": {
+    "react-native": {
+      "version": "detect"
+    }
+  },
+  "env": {
+    "react-native/react-native": true
+  }
+}
