@@ -144,24 +144,37 @@ export const MODULE_CONFIGURATIONS: Record<string, ModuleConfig> = {
     icon: 'Building',
     fields: [
       {
-        name: 'client_name',
-        label: 'Nome do Cliente',
+        name: 'client_legal_name',
+        label: 'Razão Social do Cliente',
         type: 'text',
         required: true,
-        placeholder: 'Ex: Empresa ABC Ltda'
+        placeholder: 'Ex: NOVA RIOTEL EMPREENDIMENTOS HOTELEIROS LTDA'
       },
       {
-        name: 'nome_fantasia',
+        name: 'client_trade_name',
         label: 'Nome Fantasia',
         type: 'text',
-        placeholder: 'Nome comercial da empresa'
+        placeholder: 'Nome comercial da empresa (opcional)'
       },
       {
-        name: 'endereco_completo',
-        label: 'Endereço Completo',
+        name: 'client_site_name',
+        label: 'Nome do Local/Obra',
+        type: 'text',
+        required: true,
+        placeholder: 'Ex: FAIRMONT RJ COPACABANA'
+      },
+      {
+        name: 'client_site_address',
+        label: 'Endereço do Local',
         type: 'textarea',
         required: true,
-        placeholder: 'Endereço completo da instalação'
+        placeholder: 'Ex: Av. Atlântica, 4240 Copacabana - Rio de Janeiro RJ'
+      },
+      {
+        name: 'client_received_by_name',
+        label: 'Funcionário que Recebeu a Equipe',
+        type: 'text',
+        placeholder: 'Nome do funcionário do cliente que recebeu nossa equipe'
       },
       {
         name: 'responsavel_local',
@@ -171,10 +184,22 @@ export const MODULE_CONFIGURATIONS: Record<string, ModuleConfig> = {
         placeholder: 'Nome do responsável no local'
       },
       {
+        name: 'start_travel',
+        label: 'Início do Deslocamento',
+        type: 'time',
+        placeholder: 'HH:MM'
+      },
+      {
         name: 'horario_chegada',
         label: 'Horário de Chegada',
         type: 'time',
         required: true
+      },
+      {
+        name: 'service_start_time',
+        label: 'Início dos Serviços',
+        type: 'time',
+        placeholder: 'HH:MM'
       },
       {
         name: 'data_execucao',
@@ -183,10 +208,23 @@ export const MODULE_CONFIGURATIONS: Record<string, ModuleConfig> = {
         required: true
       },
       {
+        name: 'report_type',
+        label: 'Tipo de Relatório',
+        type: 'select',
+        required: true,
+        options: ['MANUTENÇÃO PREVENTIVA', 'MANUTENÇÃO CORRETIVA', 'OUTRO']
+      },
+      {
         name: 'os_number',
         label: 'Número da OS',
         type: 'text',
         placeholder: 'Número da ordem de serviço (opcional)'
+      },
+      {
+        name: 'legend_instructions',
+        label: 'Instruções da Legenda',
+        type: 'textarea',
+        placeholder: 'Texto da legenda do modelo (opcional)'
       },
       {
         name: 'authorization',
@@ -220,7 +258,7 @@ export const MODULE_CONFIGURATIONS: Record<string, ModuleConfig> = {
         label: 'Tipo de Cabine',
         type: 'select',
         required: true,
-        options: ['CONVENCIONAL', 'SIMPLIFICADA', 'ESTALEIRO']
+        options: ['CONVENCIONAL', 'SIMPLIFICADA', 'ESTALEIRO', 'OUTRO']
       },
       {
         name: 'voltage_level',
@@ -355,6 +393,18 @@ export const MODULE_CONFIGURATIONS: Record<string, ModuleConfig> = {
         type: 'text',
         required: true,
         placeholder: 'Nome da empresa de manutenção'
+      },
+      {
+        name: 'maintenance_area',
+        label: 'Área de Manutenção',
+        type: 'text',
+        placeholder: 'Ex: MANUTENÇÃO CABINE PRIMÁRIA'
+      },
+      {
+        name: 'maintenance_observations',
+        label: 'Observações da Manutenção',
+        type: 'textarea',
+        placeholder: 'Observações específicas sobre o escopo da manutenção'
       },
       {
         name: 'next_maintenance',
@@ -534,19 +584,40 @@ export const MODULE_CONFIGURATIONS: Record<string, ModuleConfig> = {
         options: ['CPFL', 'Enel', 'EDP', 'Elektro', 'Eletropaulo', 'Outro']
       },
       {
-        name: 'codigo_consumidor',
+        name: 'concessionaire_consumer_code',
         label: 'Código do Consumidor',
         type: 'text',
         required: true,
-        placeholder: 'Código de identificação na concessionária'
+        placeholder: 'Ex: MTE 1000245'
       },
       {
-        name: 'demanda_kw',
+        name: 'contracted_demand_kw',
         label: 'Demanda Contratada',
         type: 'number',
         unit: 'kW',
         required: true,
-        validation: { min: 1, max: 50000 }
+        validation: { min: 1, max: 50000 },
+        placeholder: 'Ex: 50'
+      },
+      {
+        name: 'concessionaire_name',
+        label: 'Nome da Concessionária',
+        type: 'text',
+        placeholder: 'Ex: CPFL'
+      },
+      {
+        name: 'codigo_consumidor',
+        label: 'Código do Consumidor (Legado)',
+        type: 'text',
+        placeholder: 'Código de identificação na concessionária (campo legado)'
+      },
+      {
+        name: 'demanda_kw',
+        label: 'Demanda Contratada (Legado)',
+        type: 'number',
+        unit: 'kW',
+        validation: { min: 1, max: 50000 },
+        placeholder: 'Campo legado - use contracted_demand_kw'
       },
       {
         name: 'tariff_type',

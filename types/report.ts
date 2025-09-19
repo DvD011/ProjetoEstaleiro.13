@@ -3,20 +3,37 @@ export interface ReportMetadata {
   subtitulo: string;
   data_emissao: string; // ISO-8601 format
   autor: string;
+  report_type: string;
+  company_contact_info?: {
+    website?: string;
+    address?: string;
+    telephone?: string[];
+    email?: string;
+  };
   logo_path?: string;
 }
 
 export interface ReportInitialData {
-  cliente: string;
-  nome_fantasia?: string;
-  endereco: string;
+  client_legal_name: string;
+  client_trade_name?: string;
+  client_site_name: string;
+  client_site_address: string;
+  client_received_by_name?: string;
   horario_chegada: string;
+  start_travel?: string;
+  service_start_time?: string;
   responsavel_local: string;
   data_execucao: string;
   os_numero: string;
-  concessionaria: string;
-  demanda_kw: number;
-  codigo_consumidor: string;
+  concessionaire_name?: string;
+  concessionaria: string; // legacy field
+  contracted_demand_kw: number;
+  concessionaire_consumer_code: string;
+  demanda_kw: number; // legacy field
+  codigo_consumidor: string; // legacy field
+  legend_instructions?: string;
+  maintenance_area?: string;
+  maintenance_observations?: string;
 }
 
 export interface ReportChecklist {
