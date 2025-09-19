@@ -325,7 +325,7 @@ export const useModuleData = (inspectionId: string, moduleId: string) => {
       }
       
       // Para campos de tempo, validar formato se preenchido
-      if (field.type === 'time' && fieldValue && fieldValue.trim() !== '') {
+      if ((field.type === 'time' || field.name.includes('time') || field.name.includes('horario') || field.name.includes('travel')) && fieldValue && fieldValue.trim() !== '') {
         const timeRegex = /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/;
         if (!timeRegex.test(fieldValue)) {
           errors.push(`${field.label} (formato inválido - use HH:MM)`);

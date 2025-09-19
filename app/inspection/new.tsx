@@ -135,13 +135,13 @@ export default function NewInspectionScreen() {
           
           <View style={styles.inputGroup}>
             <Text style={styles.label}>
-              Nome do Cliente <Text style={styles.required}>*</Text>
+              Razão Social do Cliente <Text style={styles.required}>*</Text>
             </Text>
             <View style={styles.inputContainer}>
               <Building size={20} color="#6b7280" />
               <TextInput
                 style={styles.input}
-                placeholder="Ex: Empresa ABC Ltda"
+                placeholder="Ex: NOVA RIOTEL EMPREENDIMENTOS HOTELEIROS LTDA"
                 value={clientName}
                 onChangeText={setClientName}
                 autoCapitalize="words"
@@ -151,13 +151,13 @@ export default function NewInspectionScreen() {
 
           <View style={styles.inputGroup}>
             <Text style={styles.label}>
-              Local da Obra <Text style={styles.required}>*</Text>
+              Nome do Local/Obra <Text style={styles.required}>*</Text>
             </Text>
             <View style={styles.inputContainer}>
               <FileText size={20} color="#6b7280" />
               <TextInput
                 style={styles.input}
-                placeholder="Ex: Subestação Norte, Fábrica Principal"
+                placeholder="Ex: FAIRMONT RJ COPACABANA"
                 value={workSite}
                 onChangeText={setWorkSite}
                 autoCapitalize="words"
@@ -166,12 +166,12 @@ export default function NewInspectionScreen() {
           </View>
 
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>Endereço</Text>
+            <Text style={styles.label}>Endereço do Local</Text>
             <View style={styles.inputContainer}>
               <MapPin size={20} color="#6b7280" />
               <TextInput
                 style={styles.input}
-                placeholder="Endereço completo da obra"
+                placeholder="Ex: Av. Atlântica, 4240 Copacabana - Rio de Janeiro RJ"
                 value={address}
                 onChangeText={setAddress}
                 multiline

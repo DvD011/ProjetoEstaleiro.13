@@ -27,18 +27,35 @@ interface ReportObject {
     data_emissao: string;
     autor: string;
     logo_path?: string;
+    report_type?: string;
+    company_contact_info?: {
+      website?: string;
+      address?: string;
+      telephone?: string[];
+      email?: string;
+    };
   };
   dados_iniciais: {
-    cliente: string;
-    nome_fantasia?: string;
-    endereco: string;
+    client_legal_name: string;
+    client_trade_name?: string;
+    client_site_name: string;
+    client_site_address: string;
+    client_received_by_name?: string;
     horario_chegada: string;
+    start_travel?: string;
+    service_start_time?: string;
     responsavel_local: string;
     data_execucao: string;
     os_numero: string;
-    concessionaria: string;
-    demanda_kw: number;
-    codigo_consumidor: string;
+    concessionaire_name?: string;
+    concessionaria: string; // legacy field
+    contracted_demand_kw: number;
+    concessionaire_consumer_code: string;
+    demanda_kw: number; // legacy field
+    codigo_consumidor: string; // legacy field
+    legend_instructions?: string;
+    maintenance_area?: string;
+    maintenance_observations?: string;
   };
   checklists: Array<{
     secao: string;
@@ -455,18 +472,35 @@ async function collectReportData(supabase: any, inspectionId: string, mode: stri
         subtitulo: `Cliente: ${inspection.client_name} - Local: ${inspection.work_site}`,
         data_emissao: new Date().toISOString(),
         autor: 'Sistema de Inspeção Elétrica',
+        report_type: modulesByType.client?.report_type || 'MANUTENÇÃO PREVENTIVA',
+        company_contact_info: {
+          website: 'www.joule.com.br',
+          address: 'Rua Baffin, 335 • Jardim do Mar • CEP 09750-620 • São Bernardo do Campo • São Paulo, Brasil',
+          telephone: ['+55 11 2381-0838', '+55 11 2381-0839'],
+          email: 'contato@joule.com.br',
+        },
       },
       dados_iniciais: {
-        cliente: modulesByType.client?.client_name || inspection.client_name,
-        nome_fantasia: modulesByType.client?.nome_fantasia,
-        endereco: modulesByType.client?.endereco_completo || inspection.address || '',
+        client_legal_name: modulesByType.client?.client_legal_name || inspection.client_name,
+        client_trade_name: modulesByType.client?.client_trade_name,
+        client_site_name: modulesByType.client?.client_site_name || inspection.work_site,
+        client_site_address: modulesByType.client?.client_site_address || inspection.address || '',
+        client_received_by_name: modulesByType.client?.client_received_by_name,
         horario_chegada: modulesByType.client?.horario_chegada || '',
+        start_travel: modulesByType.client?.start_travel,
+        service_start_time: modulesByType.client?.service_start_time,
         responsavel_local: modulesByType.client?.responsavel_local || '',
         data_execucao: modulesByType.client?.data_execucao || inspection.created_at,
         os_numero: modulesByType.client?.os_number || `AUTO-${inspectionId.slice(-8)}`,
-        concessionaria: modulesByType.grid_connection?.concessionaria || 'N/A',
-        demanda_kw: parseFloat(modulesByType.grid_connection?.demanda_kw || '0'),
-        codigo_consumidor: modulesByType.grid_connection?.codigo_consumidor || 'N/A',
+        concessionaire_name: modulesByType.grid_connection?.concessionaire_name,
+        concessionaria: modulesByType.grid_connection?.concessionaria || 'N/A', // legacy
+        contracted_demand_kw: parseFloat(modulesByType.grid_connection?.contracted_demand_kw || modulesByType.grid_connection?.demanda_kw || '0'),
+        concessionaire_consumer_code: modulesByType.grid_connection?.concessionaire_consumer_code || modulesByType.grid_connection?.codigo_consumidor || 'N/A',
+        demanda_kw: parseFloat(modulesByType.grid_connection?.demanda_kw || '0'), // legacy
+        codigo_consumidor: modulesByType.grid_connection?.codigo_consumidor || 'N/A', // legacy
+        legend_instructions: modulesByType.client?.legend_instructions,
+        maintenance_area: modulesByType.maintenance?.maintenance_area,
+        maintenance_observations: modulesByType.maintenance?.maintenance_observations,
       },
       checklists: [],
       ensaios: [],
@@ -610,6 +644,16 @@ async function generatePDF(relatorio: ReportObject, mode: 'compatibility' | 'enr
     color: primaryColor,
   });
 
+  // Tipo de relatório na capa
+  const reportTypeText = relatorio.metadados.report_type || 'RELATÓRIO TÉCNICO DE MANUTENÇÃO PREVENTIVA EM EQUIPAMENTOS DE MÉDIA E BAIXA TENSÃO';
+  currentPage.drawText(reportTypeText, {
+    x: (pageWidth - helveticaFont.widthOfTextAtSize(reportTypeText, 12)) / 2,
+    y: pageHeight / 2 + 130,
+    size: 12,
+    font: helveticaFont,
+    color: primaryColor,
+  });
+
   currentPage.drawText(relatorio.metadados.subtitulo, {
     x: (pageWidth - helveticaItalic.widthOfTextAtSize(relatorio.metadados.subtitulo, 14)) / 2,
     y: pageHeight / 2 + 60,
@@ -646,6 +690,33 @@ async function generatePDF(relatorio: ReportObject, mode: 'compatibility' | 'enr
     size: 12,
     font: helveticaFont,
   });
+
+  // Informações de contato da empresa no rodapé da capa
+  if (relatorio.metadados.company_contact_info) {
+    const contactInfo = relatorio.metadados.company_contact_info;
+    
+    if (contactInfo.website) {
+      currentPage.drawText(contactInfo.website, {
+        x: (pageWidth - helveticaFont.widthOfTextAtSize(contactInfo.website, 10)) / 2,
+        y: 50,
+        size: 10,
+        font: helveticaFont,
+        color: primaryColor,
+      });
+    }
+    
+    if (contactInfo.address) {
+      const addressLines = wrapText(contactInfo.address, 100);
+      addressLines.forEach((line, index) => {
+        currentPage.drawText(line, {
+          x: (pageWidth - helveticaFont.widthOfTextAtSize(line, 8)) / 2,
+          y: 35 - (index * 10),
+          size: 8,
+          font: helveticaFont,
+        });
+      });
+    }
+  }
 
   // SUMÁRIO (página 2)
   addNewPage();
@@ -705,16 +776,21 @@ async function generatePDF(relatorio: ReportObject, mode: 'compatibility' | 'enr
 
   yPosition -= 40;
   const dadosIniciais = [
-    ['Cliente:', relatorio.dados_iniciais.cliente],
-    ['Nome Fantasia:', relatorio.dados_iniciais.nome_fantasia || 'N/A'],
-    ['Endereço:', relatorio.dados_iniciais.endereco],
+    ['Razão Social:', relatorio.dados_iniciais.client_legal_name],
+    ['Nome Fantasia:', relatorio.dados_iniciais.client_trade_name || 'N/A'],
+    ['Nome do Local:', relatorio.dados_iniciais.client_site_name],
+    ['Endereço:', relatorio.dados_iniciais.client_site_address],
+    ['Recebido por:', relatorio.dados_iniciais.client_received_by_name || 'N/A'],
+    ['Início Deslocamento:', relatorio.dados_iniciais.start_travel || 'N/A'],
     ['Horário de Chegada:', relatorio.dados_iniciais.horario_chegada],
+    ['Início dos Serviços:', relatorio.dados_iniciais.service_start_time || 'N/A'],
     ['Responsável Local:', relatorio.dados_iniciais.responsavel_local],
     ['Data de Execução:', relatorio.dados_iniciais.data_execucao],
     ['OS Número:', relatorio.dados_iniciais.os_numero],
-    ['Concessionária:', relatorio.dados_iniciais.concessionaria],
-    ['Demanda (kW):', relatorio.dados_iniciais.demanda_kw.toString()],
-    ['Código do Consumidor:', relatorio.dados_iniciais.codigo_consumidor],
+    ['Concessionária:', relatorio.dados_iniciais.concessionaire_name || relatorio.dados_iniciais.concessionaria],
+    ['Demanda Contratada (kW):', relatorio.dados_iniciais.contracted_demand_kw.toString()],
+    ['Código do Consumidor:', relatorio.dados_iniciais.concessionaire_consumer_code],
+    ['Área de Manutenção:', relatorio.dados_iniciais.maintenance_area || 'N/A'],
   ];
 
   dadosIniciais.forEach(([label, value]) => {
@@ -734,6 +810,58 @@ async function generatePDF(relatorio: ReportObject, mode: 'compatibility' | 'enr
     
     yPosition -= 25;
   });
+
+  // Adicionar observações de manutenção se existirem
+  if (relatorio.dados_iniciais.maintenance_observations) {
+    yPosition -= 20;
+    currentPage.drawText('Observações da Manutenção:', {
+      x: margin,
+      y: yPosition,
+      size: 12,
+      font: helveticaBold,
+    });
+    
+    yPosition -= 25;
+    const observationLines = wrapText(relatorio.dados_iniciais.maintenance_observations, 90);
+    observationLines.forEach((line) => {
+      currentPage.drawText(line, {
+        x: margin + 10,
+        y: yPosition,
+        size: 11,
+        font: helveticaFont,
+      });
+      yPosition -= 18;
+    });
+  }
+
+  // Adicionar instruções da legenda se existirem
+  if (relatorio.dados_iniciais.legend_instructions) {
+    yPosition -= 30;
+    if (yPosition < margin + 100) {
+      addNewPage();
+      yPosition -= 20;
+    }
+    
+    currentPage.drawText('Legenda:', {
+      x: margin,
+      y: yPosition,
+      size: 12,
+      font: helveticaBold,
+    });
+    
+    yPosition -= 25;
+    const legendLines = wrapText(relatorio.dados_iniciais.legend_instructions, 90);
+    legendLines.forEach((line) => {
+      currentPage.drawText(line, {
+        x: margin + 10,
+        y: yPosition,
+        size: 10,
+        font: helveticaItalic,
+        color: rgb(0.4, 0.4, 0.4),
+      });
+      yPosition -= 16;
+    });
+  }
 
   // SEÇÃO 2: PROCEDIMENTOS INICIAIS
   addNewPage();

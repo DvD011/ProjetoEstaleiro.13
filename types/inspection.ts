@@ -606,7 +606,7 @@ export const MODULE_CONFIGURATIONS: Record<string, ModuleConfig> = {
         placeholder: 'Ex: CPFL'
       },
       {
-        name: 'codigo_consumidor',
+        name: 'concessionaire_consumer_code',
         label: 'Código do Consumidor (Legado)',
         type: 'text',
         placeholder: 'Código de identificação na concessionária (campo legado)'
@@ -745,7 +745,28 @@ export const MODULE_CONFIGURATIONS: Record<string, ModuleConfig> = {
         label: 'Disjuntor Geral BT',
         type: 'text',
         required: true,
-        placeholder: 'Especificação do disjuntor principal'
+        placeholder: 'Ex: MTE 1000245'
+      },
+      {
+        name: 'contracted_demand_kw',
+        label: 'Demanda Contratada',
+        type: 'number',
+        unit: 'kW',
+        required: true,
+        validation: { min: 1, max: 50000 },
+        placeholder: 'Ex: 50'
+      },
+      {
+        name: 'concessionaire_name',
+        label: 'Nome da Concessionária',
+        type: 'text',
+        placeholder: 'Ex: CPFL'
+      },
+      {
+        name: 'codigo_consumidor',
+        label: 'Código do Consumidor (Legado)',
+        type: 'text',
+        placeholder: 'Código de identificação na concessionária (campo legado)'
       }
     ],
     photos: [

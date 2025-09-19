@@ -158,7 +158,8 @@ Deno.serve(async (req: Request) => {
 function generateEmailTemplate(emailData: EmailRequest): EmailTemplate {
   const formattedDate = formatDateForDisplay(emailData.inspection_date);
   
-  const subject = `Relatório de Inspeção Elétrica - ${emailData.client_name} - ${formattedDate}`;
+  const reportTypeText = emailData.report_type || 'Inspeção Elétrica';
+  const subject = `${reportTypeText} - ${emailData.client_name} - ${formattedDate}`;
   
   const html_body = `
     <!DOCTYPE html>
@@ -177,13 +178,13 @@ function generateEmailTemplate(emailData: EmailRequest): EmailTemplate {
     <body>
       <div class="header">
         <h1>Joule - Inspeção Elétrica</h1>
-        <p>Relatório de Inspeção Técnica</p>
+        <p>${reportTypeText}</p>
       </div>
       
       <div class="content">
         <p>Prezado(a) ${emailData.responsible_name || 'Responsável'},</p>
         
-        <p>Segue em anexo o relatório de inspeção elétrica referente à instalação de <strong>${emailData.client_name}</strong>, realizada em <strong>${formattedDate}</strong>.</p>
+        <p>Segue em anexo o relatório de ${reportTypeText.toLowerCase()} referente à instalação de <strong>${emailData.client_name}</strong>, realizada em <strong>${formattedDate}</strong>.</p>
         
         <div class="details">
           <h3>Detalhes do Relatório:</h3>
@@ -221,7 +222,7 @@ function generateEmailTemplate(emailData: EmailRequest): EmailTemplate {
   const text_body = `
 Prezado(a) ${emailData.responsible_name || 'Responsável'},
 
-Segue em anexo o relatório de inspeção elétrica referente à instalação de ${emailData.client_name}, realizada em ${formattedDate}.
+Segue em anexo o relatório de ${reportTypeText.toLowerCase()} referente à instalação de ${emailData.client_name}, realizada em ${formattedDate}.
 
 Detalhes do Relatório:
 - Cliente: ${emailData.client_name}

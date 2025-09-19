@@ -317,12 +317,25 @@ export const useReportGeneration = () => {
         }
       }
 
+      // Verificar se client_received_by_name é um e-mail válido
+      const receivedByResult = await db.getFirstAsync(
+        'SELECT field_value FROM module_data WHERE inspection_id = ? AND module_type = ? AND field_name = ?',
+        [inspectionId, 'client', 'client_received_by_name']
+      );
+
+      if (receivedByResult?.field_value) {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (emailRegex.test(receivedByResult.field_value)) {
+          recipients.push(receivedByResult.field_value);
+        }
+      }
+
       // Adicionar e-mail padrão da empresa se não houver outros
       if (recipients.length === 0) {
         recipients.push('contato@joule.com.br');
       }
 
-      return recipients;
+      return [...new Set(recipients)]; // Remove duplicatas
     } catch (error) {
       console.error('Erro ao buscar destinatários padrão:', error);
       return ['contato@joule.com.br'];

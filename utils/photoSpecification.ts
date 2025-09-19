@@ -7,7 +7,7 @@ export const PHOTO_SPECIFICATION = {
       id: 'foto1',
       name: 'fachada',
       label: 'FOTO 1 - Fachada',
-      description: 'Vista frontal da cabine/instalação',
+      description: 'Enviar foto à distância mostrando a Fachada do cliente',
       required: true,
       maxPhotos: 1,
       orientation: 'landscape',
@@ -44,7 +44,7 @@ export const PHOTO_SPECIFICATION = {
       exifPolicy: 'required_with_fallback' as const,
     }
   ],
-  filename_pattern: '{cliente}_{data}_{fotoN}.jpg',
+  filename_pattern: '{client_legal_name}_{data}_{fotoN}.jpg',
   exif_policy: {
     geotag: 'required_with_fallback',
     orientation: 'preserved',
