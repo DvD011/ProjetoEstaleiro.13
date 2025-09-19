@@ -23,18 +23,26 @@ interface ValidationError {
 export default function NewOptimizedInspectionScreen() {
   // Form state
   const [formData, setFormData] = useState({
-    client_name: '',
-    nome_fantasia: '',
-    endereco_completo: '',
+    client_legal_name: '',
+    client_trade_name: '',
+    client_site_name: '',
+    client_site_address: '',
+    client_received_by_name: '',
     responsavel_local: '',
+    start_travel: '',
     horario_chegada: '',
+    service_start_time: '',
     data_execucao: '',
+    report_type: '',
     os_number: '',
+    legend_instructions: '',
     authorization: false,
     cabin_type: '',
     voltage_level: '',
     installation_type: '',
     grounding_system: '',
+    maintenance_area: '',
+    maintenance_observations: '',
   });
 
   // UI state
@@ -55,16 +63,24 @@ export default function NewOptimizedInspectionScreen() {
   const validateForm = () => {
     const errors: ValidationError[] = [];
 
-    if (!formData.client_name.trim()) {
-      errors.push({ field: 'client_name', message: 'Nome do Cliente é obrigatório.' });
+    if (!formData.client_legal_name.trim()) {
+      errors.push({ field: 'client_legal_name', message: 'Razão Social do Cliente é obrigatória.' });
     }
 
-    if (!formData.endereco_completo.trim()) {
-      errors.push({ field: 'endereco_completo', message: 'Endereço Completo é obrigatório.' });
+    if (!formData.client_site_name.trim()) {
+      errors.push({ field: 'client_site_name', message: 'Nome do Local/Obra é obrigatório.' });
+    }
+
+    if (!formData.client_site_address.trim()) {
+      errors.push({ field: 'client_site_address', message: 'Endereço do Local é obrigatório.' });
     }
 
     if (!formData.responsavel_local.trim()) {
       errors.push({ field: 'responsavel_local', message: 'Responsável Local é obrigatório.' });
+    }
+
+    if (formData.start_travel.trim() && !/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/.test(formData.start_travel)) {
+      errors.push({ field: 'start_travel', message: 'Formato de hora inválido para Início do Deslocamento (use HH:MM).' });
     }
 
     if (!formData.horario_chegada.trim()) {
@@ -73,8 +89,16 @@ export default function NewOptimizedInspectionScreen() {
       errors.push({ field: 'horario_chegada', message: 'Formato de hora inválido (use HH:MM).' });
     }
 
+    if (formData.service_start_time.trim() && !/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/.test(formData.service_start_time)) {
+      errors.push({ field: 'service_start_time', message: 'Formato de hora inválido para Início dos Serviços (use HH:MM).' });
+    }
+
     if (!formData.data_execucao.trim()) {
       errors.push({ field: 'data_execucao', message: 'Data de Execução é obrigatória.' });
+    }
+
+    if (!formData.report_type) {
+      errors.push({ field: 'report_type', message: 'Tipo de Relatório é obrigatório.' });
     }
 
     if (!formData.authorization) {
@@ -141,7 +165,7 @@ export default function NewOptimizedInspectionScreen() {
             addr.region
           ].filter(Boolean).join(', ');
           
-          updateFormData('endereco_completo', fullAddress);
+          updateFormData('client_site_address', fullAddress);
         }
       } catch (geocodeError) {
         console.log('Erro ao obter endereço:', geocodeError);
@@ -160,17 +184,17 @@ export default function NewOptimizedInspectionScreen() {
   };
 
   const handleSaveDraft = async () => {
-    if (!formData.client_name.trim()) {
-      Alert.alert('Erro', 'Nome do Cliente é obrigatório para salvar rascunho');
+    if (!formData.client_legal_name.trim()) {
+      Alert.alert('Erro', 'Razão Social do Cliente é obrigatória para salvar rascunho');
       return;
     }
 
     setIsDraft(true);
     try {
       const inspectionId = await createInspection({
-        clientName: formData.client_name.trim(),
-        workSite: formData.endereco_completo.trim() || 'Local não especificado',
-        address: formData.endereco_completo.trim() || undefined,
+        clientName: formData.client_legal_name.trim(),
+        workSite: formData.client_site_name.trim() || 'Local não especificado',
+        address: formData.client_site_address.trim() || undefined,
         gpsLatitude: location?.latitude,
         gpsLongitude: location?.longitude,
       });
@@ -207,9 +231,9 @@ export default function NewOptimizedInspectionScreen() {
     setLoading(true);
     try {
       const inspectionId = await createInspection({
-        clientName: formData.client_name.trim(),
-        workSite: formData.endereco_completo.trim(),
-        address: formData.endereco_completo.trim() || undefined,
+        clientName: formData.client_legal_name.trim(),
+        workSite: formData.client_site_name.trim(),
+        address: formData.client_site_address.trim() || undefined,
         gpsLatitude: location?.latitude,
         gpsLongitude: location?.longitude,
       });
@@ -249,7 +273,7 @@ export default function NewOptimizedInspectionScreen() {
   };
 
   const renderProgressIndicator = () => {
-    const totalFields = 10; // Campos obrigatórios
+    const totalFields = 12; // Campos obrigatórios atualizados
     const completedFields = Object.values(formData).filter(value => 
       typeof value === 'boolean' ? value : value && value.toString().trim()
     ).length;
@@ -305,6 +329,15 @@ export default function NewOptimizedInspectionScreen() {
             Estes campos são essenciais para iniciar o processo de inspeção. 
             Você pode salvar como rascunho a qualquer momento.
           </Text>
+          
+          {/* UI Guidance Steps */}
+          <View style={styles.guidanceSteps}>
+            <Text style={styles.guidanceTitle}>Orientações de Uso:</Text>
+            <Text style={styles.guidanceText}>• Tem que clicar para mudar de tela</Text>
+            <Text style={styles.guidanceText}>• Tem que escrever para mudar tela</Text>
+            <Text style={styles.guidanceText}>• Tem que tirar foto para mudar de tela</Text>
+            <Text style={styles.guidanceText}>• Tem que fazer um vídeo com áudio</Text>
+          </View>
         </View>
 
         {/* Client Information */}
@@ -312,22 +345,22 @@ export default function NewOptimizedInspectionScreen() {
           <Text style={styles.sectionTitle}>Informações do Cliente</Text>
           
           <View style={styles.inputGroup}>
-            <Text style={[styles.label, hasFieldError('client_name') && styles.labelError]}>
-              Nome do Cliente <Text style={styles.required}>*</Text>
+            <Text style={[styles.label, hasFieldError('client_legal_name') && styles.labelError]}>
+              Razão Social do Cliente <Text style={styles.required}>*</Text>
             </Text>
-            <Text style={styles.microcopy}>Nome completo do cliente ou empresa.</Text>
-            <View style={[styles.inputContainer, hasFieldError('client_name') && styles.inputError]}>
+            <Text style={styles.microcopy}>Razão social completa conforme CNPJ.</Text>
+            <View style={[styles.inputContainer, hasFieldError('client_legal_name') && styles.inputError]}>
               <Building size={20} color="#6b7280" />
               <TextInput
                 style={styles.input}
-                placeholder="Ex: Empresa ABC Ltda"
-                value={formData.client_name}
-                onChangeText={(value) => updateFormData('client_name', value)}
+                placeholder="Ex: NOVA RIOTEL EMPREENDIMENTOS HOTELEIROS LTDA"
+                value={formData.client_legal_name}
+                onChangeText={(value) => updateFormData('client_legal_name', value)}
                 autoCapitalize="words"
               />
             </View>
-            {hasFieldError('client_name') && (
-              <Text style={styles.errorText}>{getFieldError('client_name')}</Text>
+            {hasFieldError('client_legal_name') && (
+              <Text style={styles.errorText}>{getFieldError('client_legal_name')}</Text>
             )}
           </View>
 
@@ -339,32 +372,52 @@ export default function NewOptimizedInspectionScreen() {
               <TextInput
                 style={styles.input}
                 placeholder="Nome comercial da empresa (opcional)"
-                value={formData.nome_fantasia}
-                onChangeText={(value) => updateFormData('nome_fantasia', value)}
+                value={formData.client_trade_name}
+                onChangeText={(value) => updateFormData('client_trade_name', value)}
                 autoCapitalize="words"
               />
             </View>
           </View>
 
           <View style={styles.inputGroup}>
-            <Text style={[styles.label, hasFieldError('endereco_completo') && styles.labelError]}>
-              Endereço Completo da Obra <Text style={styles.required}>*</Text>
+            <Text style={[styles.label, hasFieldError('client_site_name') && styles.labelError]}>
+              Nome do Local/Obra <Text style={styles.required}>*</Text>
             </Text>
-            <Text style={styles.microcopy}>Endereço físico onde a inspeção será realizada.</Text>
-            <View style={[styles.inputContainer, hasFieldError('endereco_completo') && styles.inputError]}>
+            <Text style={styles.microcopy}>Nome específico do local onde a inspeção será realizada.</Text>
+            <View style={[styles.inputContainer, hasFieldError('client_site_name') && styles.inputError]}>
+              <FileText size={20} color="#6b7280" />
+              <TextInput
+                style={styles.input}
+                placeholder="Ex: FAIRMONT RJ COPACABANA"
+                value={formData.client_site_name}
+                onChangeText={(value) => updateFormData('client_site_name', value)}
+                autoCapitalize="words"
+              />
+            </View>
+            {hasFieldError('client_site_name') && (
+              <Text style={styles.errorText}>{getFieldError('client_site_name')}</Text>
+            )}
+          </View>
+
+          <View style={styles.inputGroup}>
+            <Text style={[styles.label, hasFieldError('client_site_address') && styles.labelError]}>
+              Endereço do Local <Text style={styles.required}>*</Text>
+            </Text>
+            <Text style={styles.microcopy}>Endereço físico completo onde a inspeção será realizada.</Text>
+            <View style={[styles.inputContainer, hasFieldError('client_site_address') && styles.inputError]}>
               <MapPin size={20} color="#6b7280" />
               <TextInput
                 style={styles.input}
-                placeholder="Endereço completo da instalação (rua, número, bairro, cidade, estado)"
-                value={formData.endereco_completo}
-                onChangeText={(value) => updateFormData('endereco_completo', value)}
+                placeholder="Ex: Av. Atlântica, 4240 Copacabana - Rio de Janeiro RJ"
+                value={formData.client_site_address}
+                onChangeText={(value) => updateFormData('client_site_address', value)}
                 multiline
                 numberOfLines={2}
                 autoCapitalize="words"
               />
             </View>
-            {hasFieldError('endereco_completo') && (
-              <Text style={styles.errorText}>{getFieldError('endereco_completo')}</Text>
+            {hasFieldError('client_site_address') && (
+              <Text style={styles.errorText}>{getFieldError('client_site_address')}</Text>
             )}
             
             <TouchableOpacity
@@ -377,6 +430,21 @@ export default function NewOptimizedInspectionScreen() {
                 {gettingLocation ? 'Obtendo localização...' : 'Usar localização atual'}
               </Text>
             </TouchableOpacity>
+          </View>
+
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>Funcionário que Recebeu a Equipe</Text>
+            <Text style={styles.microcopy}>Nome do funcionário do cliente que recebeu nossa equipe no local.</Text>
+            <View style={styles.inputContainer}>
+              <FileText size={20} color="#6b7280" />
+              <TextInput
+                style={styles.input}
+                placeholder="Ex: RICARDO"
+                value={formData.client_received_by_name}
+                onChangeText={(value) => updateFormData('client_received_by_name', value)}
+                autoCapitalize="words"
+              />
+            </View>
           </View>
 
           <View style={styles.inputGroup}>
@@ -405,10 +473,31 @@ export default function NewOptimizedInspectionScreen() {
           <Text style={styles.sectionTitle}>Informações de Agendamento</Text>
           
           <View style={styles.inputGroup}>
+            <Text style={[styles.label, hasFieldError('start_travel') && styles.labelError]}>
+              Início do Deslocamento
+            </Text>
+            <Text style={styles.microcopy}>Horário de saída para o local da inspeção (formato 24h).</Text>
+            <View style={[styles.inputContainer, hasFieldError('start_travel') && styles.inputError]}>
+              <Clock size={20} color="#6b7280" />
+              <TextInput
+                style={styles.input}
+                placeholder="HH:MM"
+                value={formData.start_travel}
+                onChangeText={(value) => updateFormData('start_travel', value)}
+                keyboardType="numeric"
+                maxLength={5}
+              />
+            </View>
+            {hasFieldError('start_travel') && (
+              <Text style={styles.errorText}>{getFieldError('start_travel')}</Text>
+            )}
+          </View>
+
+          <View style={styles.inputGroup}>
             <Text style={[styles.label, hasFieldError('horario_chegada') && styles.labelError]}>
               Horário de Chegada <Text style={styles.required}>*</Text>
             </Text>
-            <Text style={styles.microcopy}>Horário de início da inspeção (formato 24h).</Text>
+            <Text style={styles.microcopy}>Horário de chegada ao local da inspeção (formato 24h).</Text>
             <View style={[styles.inputContainer, hasFieldError('horario_chegada') && styles.inputError]}>
               <Clock size={20} color="#6b7280" />
               <TextInput
@@ -422,6 +511,27 @@ export default function NewOptimizedInspectionScreen() {
             </View>
             {hasFieldError('horario_chegada') && (
               <Text style={styles.errorText}>{getFieldError('horario_chegada')}</Text>
+            )}
+          </View>
+
+          <View style={styles.inputGroup}>
+            <Text style={[styles.label, hasFieldError('service_start_time') && styles.labelError]}>
+              Início dos Serviços
+            </Text>
+            <Text style={styles.microcopy}>Horário de início efetivo dos trabalhos de inspeção (formato 24h).</Text>
+            <View style={[styles.inputContainer, hasFieldError('service_start_time') && styles.inputError]}>
+              <Clock size={20} color="#6b7280" />
+              <TextInput
+                style={styles.input}
+                placeholder="HH:MM"
+                value={formData.service_start_time}
+                onChangeText={(value) => updateFormData('service_start_time', value)}
+                keyboardType="numeric"
+                maxLength={5}
+              />
+            </View>
+            {hasFieldError('service_start_time') && (
+              <Text style={styles.errorText}>{getFieldError('service_start_time')}</Text>
             )}
           </View>
 
@@ -446,6 +556,36 @@ export default function NewOptimizedInspectionScreen() {
           </View>
 
           <View style={styles.inputGroup}>
+            <Text style={[styles.label, hasFieldError('report_type') && styles.labelError]}>
+              Tipo de Relatório <Text style={styles.required}>*</Text>
+            </Text>
+            <Text style={styles.microcopy}>Tipo principal do relatório conforme capa do documento.</Text>
+            <View style={styles.selectContainer}>
+              {['MANUTENÇÃO PREVENTIVA', 'MANUTENÇÃO CORRETIVA', 'OUTRO'].map((option) => (
+                <TouchableOpacity
+                  key={option}
+                  style={[
+                    styles.selectOption,
+                    formData.report_type === option && styles.selectOptionActive,
+                    hasFieldError('report_type') && styles.selectOptionError,
+                  ]}
+                  onPress={() => updateFormData('report_type', option)}
+                >
+                  <Text style={[
+                    styles.selectOptionText,
+                    formData.report_type === option && styles.selectOptionTextActive,
+                  ]}>
+                    {option}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+            {hasFieldError('report_type') && (
+              <Text style={styles.errorText}>{getFieldError('report_type')}</Text>
+            )}
+          </View>
+
+          <View style={styles.inputGroup}>
             <Text style={styles.label}>Número da OS</Text>
             <Text style={styles.microcopy}>Identificador da Ordem de Serviço, se aplicável.</Text>
             <View style={styles.inputContainer}>
@@ -455,6 +595,22 @@ export default function NewOptimizedInspectionScreen() {
                 placeholder="Número da Ordem de Serviço (opcional)"
                 value={formData.os_number}
                 onChangeText={(value) => updateFormData('os_number', value)}
+              />
+            </View>
+          </View>
+
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>Instruções da Legenda</Text>
+            <Text style={styles.microcopy}>Texto da legenda do modelo para referência (opcional).</Text>
+            <View style={styles.inputContainer}>
+              <FileText size={20} color="#6b7280" />
+              <TextInput
+                style={styles.input}
+                placeholder="Texto da legenda presente no modelo (opcional)"
+                value={formData.legend_instructions}
+                onChangeText={(value) => updateFormData('legend_instructions', value)}
+                multiline
+                numberOfLines={2}
               />
             </View>
           </View>
@@ -470,7 +626,7 @@ export default function NewOptimizedInspectionScreen() {
             </Text>
             <Text style={styles.microcopy}>Selecione o tipo de cabine elétrica a ser inspecionada.</Text>
             <View style={styles.selectContainer}>
-              {['CONVENCIONAL', 'SIMPLIFICADA', 'ESTALEIRO'].map((option) => (
+              {['CONVENCIONAL', 'SIMPLIFICADA', 'ESTALEIRO', 'OUTRO'].map((option) => (
                 <TouchableOpacity
                   key={option}
                   style={[
@@ -585,6 +741,42 @@ export default function NewOptimizedInspectionScreen() {
           </View>
         </View>
 
+        {/* Maintenance Information */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Informações de Manutenção</Text>
+          
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>Área de Manutenção</Text>
+            <Text style={styles.microcopy}>Área específica ou escopo da manutenção.</Text>
+            <View style={styles.inputContainer}>
+              <FileText size={20} color="#6b7280" />
+              <TextInput
+                style={styles.input}
+                placeholder="Ex: MANUTENÇÃO CABINE PRIMÁRIA"
+                value={formData.maintenance_area}
+                onChangeText={(value) => updateFormData('maintenance_area', value)}
+                autoCapitalize="words"
+              />
+            </View>
+          </View>
+
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>Observações da Manutenção</Text>
+            <Text style={styles.microcopy}>Observações específicas sobre o escopo da manutenção.</Text>
+            <View style={styles.inputContainer}>
+              <FileText size={20} color="#6b7280" />
+              <TextInput
+                style={styles.input}
+                placeholder="Observações específicas sobre o escopo da manutenção"
+                value={formData.maintenance_observations}
+                onChangeText={(value) => updateFormData('maintenance_observations', value)}
+                multiline
+                numberOfLines={3}
+              />
+            </View>
+          </View>
+        </View>
+
         {/* Authorization */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Autorização</Text>
@@ -639,7 +831,7 @@ export default function NewOptimizedInspectionScreen() {
         <TouchableOpacity
           style={styles.draftButtonLarge}
           onPress={handleSaveDraft}
-          disabled={isDraft || !formData.client_name.trim()}
+          disabled={isDraft || !formData.client_legal_name.trim()}
         >
           <Save size={20} color="#6b7280" />
           <Text style={styles.draftButtonText}>
@@ -792,6 +984,25 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#3730a3',
     lineHeight: 20,
+  },
+  guidanceSteps: {
+    backgroundColor: '#f0fdf4',
+    borderRadius: 6,
+    padding: 12,
+    marginTop: 12,
+    borderLeftWidth: 3,
+    borderLeftColor: '#10b981',
+  },
+  guidanceTitle: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#166534',
+    marginBottom: 8,
+  },
+  guidanceText: {
+    fontSize: 12,
+    color: '#166534',
+    marginBottom: 2,
   },
   section: {
     backgroundColor: '#ffffff',

@@ -12,6 +12,7 @@ import { useLocalSearchParams, router } from 'expo-router';
 import { useAdvancedCamera } from '@/hooks/useAdvancedCamera';
 import { CameraViewComponent } from '@/components/camera/CameraView';
 import { MediaPreview } from '@/components/camera/MediaPreview';
+import { PHOTO_SPECIFICATION } from '@/utils/photoSpecification';
 import { ArrowLeft, Camera, CircleCheck as CheckCircle, Circle, MapPin, ClipboardCheck } from 'lucide-react-native';
 
 interface RequiredPhoto {
@@ -26,36 +27,15 @@ interface RequiredPhoto {
 
 export default function RequiredPhotosScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const [photos, setPhotos] = useState<RequiredPhoto[]>([
-    {
-      id: 'foto1',
-      name: 'fachada',
-      label: 'FOTO 1 - Fachada',
-      description: 'Vista frontal da cabine/instalação',
+  const [photos, setPhotos] = useState<RequiredPhoto[]>(
+    PHOTO_SPECIFICATION.photos.map(photoSpec => ({
+      id: photoSpec.id,
+      name: photoSpec.name,
+      label: photoSpec.label,
+      description: photoSpec.description,
       captured: false,
-    },
-    {
-      id: 'foto2',
-      name: 'proximidade',
-      label: 'FOTO 2 - Proximidade/Trafo',
-      description: 'Vista próxima do transformador e equipamentos',
-      captured: false,
-    },
-    {
-      id: 'foto3',
-      name: 'placa',
-      label: 'FOTO 3 - Placa/Tags',
-      description: 'Placas de identificação e etiquetas',
-      captured: false,
-    },
-    {
-      id: 'foto4',
-      name: 'quadro_geral',
-      label: 'FOTO 4 - Quadro Geral',
-      description: 'Vista geral do quadro elétrico principal',
-      captured: false,
-    },
-  ]);
+    }))
+  );
 
   const [showCamera, setShowCamera] = useState(false);
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
